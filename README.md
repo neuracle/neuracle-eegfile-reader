@@ -11,13 +11,13 @@ The Neuracle data format consists of several separate files:
   
 - A binary evt.bdf containing information about events in the data
 
-- A recordInformation.json file containing information about examination such as subject info, exam item and so on.
+- A recordInformation.json file containing information about examination such as subject info and so on.
 
 # Use 
 
 1. Add EEGLAB toolbox folder to the path of Matlab (via Matlab --> File --> Set path)
 
-2. Add neuracle-eegfile-reader to EEGLAB subfolder, plugin folder. 
+2. Add neuracle-eegfile-reader to EEGLAB subfolder, plugin folder.
 
 PS: To import Neuracle's EEG data in EEGLAB, you MUST select one or more data.\*.bdf and the evt.data file at the same time.  
 
