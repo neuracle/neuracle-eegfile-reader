@@ -15,13 +15,13 @@
 %   For more information on how to create an EEGLAB plugin see the
 %   help message of eegplugin_besa() or visit http://www.sccn.ucsd.edu/eeglab/contrib.html
 %
-% Author: Xiaoshan Huang, hxs@neuracle.cn
-%         Junying FANG, fangjunying@neuracle.cn
+% Author: Xiaoshan HUANG, hxs@neuracle.cn
 %
 % Versions:
 %    v1.0: 2017-09-27, orignal
-%    v1.1: 2018-08-12, update pop_importNeuracle.m
-% Copyright (c) 2017 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
+%    v1.1: 2019-12-26, update pop_importNeuracle.m
+
+% Copyright (c) 2019 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
 %
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ function eegplugin_importNeuracle(fig, trystrs, catchstrs)
     
     % menu callbacks
     % --------------
-    comcnt = [ trystrs.no_check '[EEG] = pop_importNeuracle;' catchstrs.new_and_hist ];
+    comcnt = [ trystrs.no_check '[EEG, command] = pop_importNeuracle;' catchstrs.new_and_hist ];
     
     % create menus
     % ------------

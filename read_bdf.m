@@ -1,254 +1,36 @@
-function EEG = readbdfdata(filename, pathname)
+function dat = read_bdf(filename, hdr, begsample, endsample, chanindx)
 %
-% Syntax: EEG = readbdfdata(filename, pathname)
-%     
+% Syntax: dat = read_bdf(filename)
+%         dat = read_bdf(filename, hdr, begsample, endsample, chanindx)
 %
 % Inputs:
 %     filename: 
-%     pathname: path to data files
+%     hdr
+%     begsample
+%     endsample
+%     chanindx
 % Outputs:
-%     EEG data structure
+%     dat or hdr
 %
 % Example:
 % 
-%     >> pathname = 'C:\Download\SampleData\';
-%     >> filename = {'data.bdf','evt.bdf'};
-%     >> EEG = readbdfdata(filename, pathname);
-%     
+%     >> filename = 'C:\Download\SampleData\data.bdf';
+%     >> hdr = readbdfdata(filename);
+%     >> hdr = readbdfdata(filename,hdr, begsample, endsample, chanindx);
 % 
 % Subfunctions: read_bdf, readLowLevel, readEvents
 % MAT-files required: none
 %
-% Author: Xiaoshan Huang, hxs@neuracle.cn
-%         Junying FANG, fangjunying@neuracle.cn
+% Author: Xiaoshan HUANG, hxs@neuracle.cn
+%         Junying FANG,fangjunying@neuracle.cn
+
 % Versions:
 %    v1.0: 2017-09-27, orignal
-%    v1.1: 2018-08-12, update readbdfdata.m
-% Copyright (c) 2017 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
+%    v1.0.2: 2019-03-28, correct 'boundary' of event and fread UTF-8 annotations
+% 
+
+% Copyright (c) 2019 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%find the index of data file
-index = [];
-if ~iscell(filename)
-    filename = {filename};
-end
-for i = 1:length(filename)
-    if length(filename{i}) >= 4 %length('data')==4
-        if isequal(filename{i}(1:4), 'data')
-            index = [index, i];
-        end
-    end
-end
-datafilelength = length(index);
-
-%read data files
-if datafilelength >0
-    %add information for eeglab structure
-    EEG.setname = 'BDF file';
-    EEG.filename = '';
-    EEG.filepath = '';
-    EEG.subject = '';
-    EEG.group = '';
-    EEG.condition = '';
-    EEG.session = [];
-    strfile = cell(length(filename),1);
-    for k = 1:length(filename), strfile{k,1} =['Original file:' pathname filename{1,k}];end
-    EEG.comments = char(strfile);
-    EEG.icaact = [];
-    EEG.icawinv = [];
-    EEG.icasphere = [];
-    EEG.icaweights = [];
-    EEG.icachansind = [];
-    chaninfo.plotrad = [];
-    chaninfo.shrink = [];
-    chaninfo.nosedir = '+X';
-    chaninfo.icachansind = [];
-    EEG.chaninfo = chaninfo;
-    EEG.ref = 'common';
-    EEG.specdata = [];
-    EEG.specicaact = [];
-    EEG.splinefile = '';
-    EEG.icasplinefile = '';
-    EEG.dipfit = [];
-    EEG.xmin = 0;
-    EEG.xmax = 0;
-    EEG.pnts = 0;
-    T0 = [];
-    EEG.urevent = [];
-    EEG.eventdescription = {};
-    EEG.epoch = [];
-    EEG.epochdescription = {};
-    EEG.data = [];
-    Data = {};
-    datapnts = [];
-    for i = 1:datafilelength
-        datafilename = [pathname filename{index(i)}];
-        %read header
-        hdr = read_bdf(datafilename);  
-        EEG.srate = hdr.Fs; 
-        EEG.nbchan = hdr.nChans;
-        datapnts = [datapnts,hdr.nSamples];
-        EEG.pnts = EEG.pnts+hdr.nSamples;
-        EEG.chanlocs=  hdr.chanlocs;
-        EEG.trials = hdr.nTrials;
-        EEG.xmax = EEG.xmax+EEG.pnts/EEG.srate; %in seconds
-        T0 = [T0; hdr.T0];
-        %compatible with older version data file which has event channel
-        if hdr.Annotation == 1
-            evt = hdr.event;
-            evt = cell2mat(evt);
-            EEG.event = struct([]);
-            if isstruct(evt)
-                for kk = 1:size(evt,2)
-                    event = struct('type',evt(kk).eventvalue,'latency',round(evt(kk).offset_in_sec*EEG.srate));
-                    EEG.event = [EEG.event;event];
-                end
-            end
-        end
-        if datafilelength == 1
-            EEG.data = read_bdf(datafilename,hdr,1,hdr.nSamples);
-        else
-            Data{i} = read_bdf(datafilename,hdr,1,hdr.nSamples);
-        end
-    end
-    patientInfo = split(hdr.orig.PID);
-    patientName = strtrim(patientInfo{4});
-    if ~strcmpi(patientName,'X') && isempty(strfind(patientName,'?'))
-        EEG.setname = [EEG.setname ' - ' patientName ];     
-    end
-    EEG.times = [1:EEG.pnts]*1000/EEG.srate; 
-    for j=1:size(T0,1)
-        startsecs(j) = T0(j,1)*946080000+T0(j,2)*2592000+T0(j,3)*86400+T0(j,4)*3600+T0(j,5)*60+T0(j,6);
-    end
-    [startsecs,indexsorted] = sort(startsecs);
-    T0 = T0(indexsorted,:);
-    if datafilelength > 1
-        % speed up 
-        EEG.data = zeros(EEG.nbchan,EEG.pnts);
-        seg = [0 cumsum(datapnts(indexsorted))];
-        for k = 1:datafilelength
-            EEG.data(:,seg(k)+1:seg(k+1)) = Data{indexsorted(k)};
-        end
-    end
-    etc.T0 = T0(1,:);
-    EEG.etc = etc;
-    
-    %read event
-    ind = find(ismember(filename,'evt.bdf'));
-    if numel(ind)        
-        eventfilename = [pathname filename{ind}];
-        hdr = read_bdf(eventfilename);
-        evt = hdr.event;
-        evt = cell2mat(evt);
-        EEG.event = struct([]);
-        if isstruct(evt)
-            for i = 1:size(evt,2)
-                event = struct('type',evt(i).eventvalue,'latency',round(evt(i).offset_in_sec*EEG.srate));
-                EEG.event = [EEG.event;event];
-            end
-        end
-        %shift event latency for multiple data files only
-        if datafilelength > 1
-            startpnts = floor((startsecs-startsecs(1))*EEG.srate);  %relative time
-            endpnts = zeros(1,datafilelength);
-            pausepnts = 0;
-            Event = struct([]);
-            datapnts = datapnts(indexsorted);
-            for j = 1:datafilelength
-                endpnts(j) = startpnts(j)+datapnts(j);
-                if j > 1
-                    pausepnts = pausepnts+(startpnts(j)-endpnts(j-1));
-                end
-                for k = 1:length(EEG.event)
-                    if startpnts(j) <= EEG.event(k).latency && endpnts(j) >= EEG.event(k).latency
-                        EEG.event(k).latency = EEG.event(k).latency-pausepnts;
-                        Event = [Event;EEG.event(k)];
-                    end
-                end
-                if j < datafilelength
-                    eventBoundary = struct('type','boundary','latency',endpnts(j)-pausepnts+1); % relative ending
-                    Event = [Event;eventBoundary];
-                end
-            end
-            boundaries = findboundaries(Event);
-            if boundaries(end)>EEG.pnts
-                Event(end) = [];
-            end
-            EEG.event = Event;
-        end
-    elseif exist([pathname 'evt.bdf'],'file') == 0 && hdr.Annotation == 0
-        EEG.event = struct([]);
-    end
-    
-    %read mems data and combine with EEG data
-    memstype = {'acc.edf','gyro.edf','mag.edf'};
-    for gg = 1:length(memstype)
-        %initialize
-        indexmems = [];
-        T0mems = [];
-        memsData = {};
-        mems.data = [];
-        %find the index of the mems file
-        for ii = 1:length(filename)
-            lennametype = length(memstype{gg})-4;  %ignore '.edf'
-            if length(filename{ii}) >= lennametype
-                if isequal(filename{ii}(1:lennametype), memstype{gg}(1:lennametype))
-                    indexmems = [indexmems, ii];
-                end
-            end
-        end
-        filelength = length(indexmems);
-        if filelength >0  
-            for ii = 1:filelength
-                memsfilename = [pathname filename{indexmems(ii)}];
-                %read header
-                hdrmems = read_bdf(memsfilename);  
-                chanlocs=  hdrmems.chanlocs;
-                nbchan = hdrmems.nChans; 
-                T0mems = [T0mems; hdrmems.T0];
-                %read data
-                data = read_bdf(memsfilename,hdrmems,1,hdrmems.nSamples); 
-                %resample
-                datarsp = [];
-                for jj = 1:nbchan
-                    datamems = resample(data(jj,:), EEG.srate, hdrmems.Fs);
-                    datarsp = [datarsp;datamems];
-                end
-                if filelength == 1
-                    mems.data = datarsp;
-                else
-                    memsData{ii} = datarsp;
-                end
-            end
-            if filelength > 1
-                %sort the  mems data files based on start time (T0)
-                for aa=1:size(T0mems,1)
-                    startsecs(aa) = T0mems(aa,1)*946080000+T0mems(aa,2)*2592000+T0mems(aa,3)*86400+T0mems(aa,4)*3600+T0mems(aa,5)*60+T0mems(aa,6);
-                end
-                [startsecs,indexsorted] = sort(startsecs);
-                for bb = 1:filelength
-                    mems.data = [mems.data,memsData{indexsorted(bb)}];
-                end
-            end
-            %make sure EEG and mems data have same length
-            nbpnts = size(mems.data,2) ;
-            if nbpnts == EEG.pnts
-                EEG.data = [EEG.data; mems.data];
-            elseif nbpnts > EEG.pnts
-                EEG.data = [EEG.data; mems.data(:,1:EEG.pnts)];
-            elseif nbpnts < EEG.pnts    
-                EEG.data = [EEG.data(:,1:hdr.nSamples); mems.data];
-            end
-            EEG.chanlocs = [EEG.chanlocs ; chanlocs ];
-            EEG.nbchan = EEG.nbchan + nbchan;
-        end
-    end
-else
-    error('Please select EEG datasets with the filenames starting by "data" ')
-end
-      
-
-function dat = read_bdf(filename, hdr, begsample, endsample, chanindx)
 
 if nargin==1
   % read the header, this code is from EEGLAB's openbdf
@@ -396,8 +178,11 @@ if nargin==1
   
   hdr.Annotation = 0;
   hdr.AnnotationChn = -1;
-  if any(EDF.SampleRate~=EDF.SampleRate(1))
+  if any(EDF.SampleRate~=EDF.SampleRate(1)) || (length(EDF.SampleRate) == 1)% maybe bug when tigger sample-rate is equal to that of channels
       chn_indx = find(EDF.SampleRate~=EDF.SampleRate(1));
+      if isempty(chn_indx)
+          chn_indx = 1;
+      end
       if(length(chn_indx) > 0 && (strcmp(EDF.Label(chn_indx,:),repmat('BDF Annotations',length(chn_indx),1))) || strcmp(EDF.Label(chn_indx,:),repmat('BDF Annotations ',length(chn_indx),1)))
           disp('BDF+ file format detected, the BDF Annotation channel will be skipped when reading data');
           hdr.Annotation = 1;
@@ -590,38 +375,9 @@ status = fseek(fp, offset, 'bof');
 if status
     error(['failed seeking ' filename]);
 end
-% [buf,num] = fread(fp,numwords*3,'uint8=>char');
-[buf,num] = fread(fp,numwords*3,'*uint8');
+[buf,num] = fread(fp,numwords*3,'uint8=>char');
 fclose(fp);
 if (num<numwords)
     error(['failed opening ' filename]);
     return
 end
-
-function boundaries = findboundaries(event)
-
-if isfield(event, 'type') & isfield(event, 'latency') & cellfun('isclass', {event.type}, 'char')
-
-    % Boundary event indices
-    boundaries = strmatch('boundary', {event.type});
-
-    % Boundary event latencies
-    boundaries = [event(boundaries).latency];
-
-    % Shift boundary events to epoch onset
-    boundaries = fix(boundaries + 0.5);
-
-    % Remove duplicate boundary events
-    boundaries = unique(boundaries);
-
-    % Epoch onset at first sample?
-    if isempty(boundaries) || boundaries(1) ~= 1
-        boundaries = [1 boundaries];
-    end
-
-else
-
-    boundaries = 1;
-
-end
-
