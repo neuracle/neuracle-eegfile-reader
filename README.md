@@ -9,7 +9,7 @@ There are two kinds of directory structure about recording data which are produc
 
 ![subject-directory-structure](https://github.com/neuracle/neuracle-eegfile-reader/blob/master/pics/subject-directory-structure.png)
 
-Under *subject_folder* forder, one directory structure contains one or more data.\*.bdf files which are typically created when you checked impedance during recording period, an evt.bdf file, and a recorderInfo.json file, the other contains several subfolders where a data.bdf file is included, an evt.bdf file, and a recorderInfo.json file. Sometime other files are also recorded such audio files and spike.bdf files but not necessary for parsering EEG data. 
+Under *subject_folder* forder, one directory structure contains one or more data.\*.bdf files which are typically created when you check impedance during recording period, an evt.bdf file, and a recorderInfo.json file, the other contains several subfolders where a data.bdf file is included, an evt.bdf file, and a recorderInfo.json file. Sometime other files are also recorded such as audio files and spike.bdf files but not necessary for parsering EEG data. 
 
 - A binary data.\*.bdf file containing the voltage values of the EEG  
   
