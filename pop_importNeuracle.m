@@ -50,7 +50,7 @@ if nargin < 1
         if ~iscell(filename),filename = {filename};end
         try if filename(1) == 0 ,return; end,  end
         for i = 1:length(filename)
-            str = split(filename{1,i},'.');
+            str = strsplit(filename{1,i},'.');
             if strcmpi(str{1,1},'data'), n= n+1;datafilename{1,n} = [foldname,filename{1,i}];end
             if strcmpi(str{1,1},'evt'),m = m+1;evtfilename{1,m} = [foldname,filename{1,i}];end
         end
@@ -64,12 +64,12 @@ if nargin < 1
                 flagHEEG = 1;
                 temp = dir(fullfile(foldname,sepfile(i).name));tempnames = {temp.name}';temp(ismember(tempnames,{'.','..'})) = [];
                 for j = 1:length(temp)
-                    str = split(temp(j).name,'.');
+                    str = strsplit(temp(j).name,'.');
                     if strcmpi(str{1,1},'data'),n= n+1; datafilename{1,n} = fullfile(foldname,sepfile(i).name,temp(j).name);end
                     if strcmpi(str{1,1},'evt'),m = m+1;evtfilename{1,m} = fullfile(foldname,sepfile(i).name,temp(j).name);end
                 end
             else
-                str = split(sepfile(i).name,'.');
+                str = strsplit(sepfile(i).name,'.');
                 if strcmpi(str{1,1},'evt')&strcmpi(str{end},'bdf'),m = m+1;evtfilename{1,m} = fullfile(foldname,sepfile(i).name);end
                 if strcmpi(str{1,1},'data')& strcmpi(str{end},'bdf'),n = n+1;datafilename{1,n} = fullfile(foldname,sepfile(i).name);end   
             end
@@ -126,7 +126,7 @@ if nargin < 1
         eval( [ '[' result{1} ']' ]);
     catch
         chanlabels = lower(hdr.label);
-        stridx = lower(split(result{1},' '));
+        stridx = lower(strsplit(result{1},' '));
         [Lia,Locb] = ismember(stridx,chanlabels);
         result{1} = int2str(Locb(Lia)');
         if ~isempty(find(Lia == 0)),disp(['can not find channel: ' stridx{~Lia}]);end
@@ -214,7 +214,7 @@ chaninfo.shrink = [];
 chaninfo.nosedir = '+X';
 chaninfo.icachansind = [];
 EEG.chaninfo = chaninfo;
-patientInfo = split(hdr.orig.PID);
+patientInfo = strsplit(hdr.orig.PID);
 patientName = strtrim(patientInfo{4});
 if ~strcmpi(patientName,'X')
     EEG.setname = [EEG.setname ' - ' patientName ];     
