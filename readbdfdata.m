@@ -22,7 +22,7 @@ function EEG = readbdfdata(filename, pathname)
 %    v1.0: 2017-09-27, orignal
 %    v1.1: 2018-08-12, fix bug for shifting event latency for multiple data files
 %    v1.2: 2019-03-28, fix bug for correcting event.latency of 'boundary' and freading UTF-8 annotations
-% Copyright (c) 2017 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
+% Copyright (c) 2020 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %find the index of data file

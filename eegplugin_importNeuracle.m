@@ -21,7 +21,7 @@
 %    v1.0: 2017-09-27, orignal
 %    v1.1: 2019-12-26, update pop_importNeuracle.m
 
-% Copyright (c) 2019 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
+% Copyright (c) 2020 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
 %
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by

@@ -30,7 +30,7 @@ function dat = read_bdf(filename, hdr, begsample, endsample, chanindx)
 % 
 % This function used to parser binary file in 24-bits BDF format,referencing read_edf.m in fieldtrip toolbox
 % see http://www.fieldtriptoolbox.org
-% Copyright (c) 2019 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
+% Copyright (c) 2020 Neuracle, Inc. All Rights Reserved. http://neuracle.cn
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if nargin==1
