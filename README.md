@@ -5,7 +5,7 @@ Neuracle-eegfile-reader runs in Matlab as a plugin of the EEGLAB software. It is
 BDF is a 24 bit version of the popular 16 bit EDF format, which was used on previous BioSemi models with 16 bit converters. More details can be found here, <https://www.edfplus.info/>
 
 # Neuracle EEG data files
-There are two kinds of directory structure about recording data which are produced by Neuracle EEG Recorder in the figure below. 
+Actually for each recording session one folder is created. There are two kinds of directory structure, showing in the figure below.  
 
 ![subject-directory-structure](https://github.com/neuracle/neuracle-eegfile-reader/blob/master/pics/subject-directory-structure.png)
 
@@ -23,12 +23,14 @@ Under *subject_folder* forder, one directory structure contains one or more data
 
 2. Add neuracle-eegfile-reader to EEGLAB subfolder, plugin folder.
 
-PS: To import Neuracle's EEG data in EEGLAB, you MUST at the same time select one or more data.\*.bdf files and the evt.data file, or select a folder that contains those files. 
+PS: To import Neuracle's EEG data in EEGLAB, you have to select one or more data.\*.bdf files and the evt.data file, or select a folder that contains those files. 
 
 You are able to use the readbdfdata funtion to directly create a EEG struct rather than through EEGLAB plugin.for example:
-[filename, pathname] = uigetfile({'*.bdf;*.edf;*.json';'*.*'}, 'Pick a recorded EEG data file','MultiSelect', 'on');
-EEG = readmultibdfdata(filename, pathname);
+```
+>> [filename, pathname] = uigetfile({'*.bdf;*.edf;*.json';'*.*'}, 'Pick a recorded EEG data file','MultiSelect', 'on');
 
+>> EEG = pop_importNeuracle(filename, pathname);
+```
 
 # Licence
 
