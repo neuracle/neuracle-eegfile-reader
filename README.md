@@ -25,7 +25,7 @@ Under *subject_folder* forder, one directory structure contains one or more data
 
 PS: To import Neuracle's EEG data in EEGLAB, you have to select one or more data.\*.bdf files and the evt.data file, or select a folder that contains those files. 
 
-You are able to use the readbdfdata funtion to directly create a EEG struct rather than through EEGLAB plugin.for example:
+You are able to use the 'pop_importNeuracle.m' funtion to directly create a EEG struct rather than through EEGLAB plugin. for example:
 ```
 >> [filename, pathname] = uigetfile({'*.bdf;*.edf;*.json';'*.*'}, 'Pick a recorded EEG data file','MultiSelect', 'on');
 
