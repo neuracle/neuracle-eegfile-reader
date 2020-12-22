@@ -27,9 +27,12 @@ PS: To import Neuracle's EEG data in EEGLAB, you have to select one or more data
 
 You are able to use the 'pop_importNeuracle.m' funtion to directly create a EEG struct rather than through EEGLAB plugin. for example:
 ```
->> [filename, pathname] = uigetfile({'*.bdf;*.edf;*.json';'*.*'}, 'Pick a recorded EEG data file','MultiSelect', 'on');
+>> [filename, pathname] = uigetfile({'*.bdf;*.edf;'*.*'}, 'Pick a recorded EEG data file','MultiSelect', 'on');
 
 >> EEG = pop_importNeuracle(filename, pathname);
+
+OR
+>> EEG = pop_importNeuracle()
 ```
 
 # Licence
